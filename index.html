@@ -113,7 +113,7 @@ td.jobid{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;
 <script>
 let raw=null,activeTab='person';
 // Person filters
-let pYear='ALL',pDept='ALL',pStatus='ALL',pSearch='',pSort=null,pDir=1;
+let pYear='ALL',pDept='ALL',pStatus='ALL',pSearch='',pSort=null,pDir=1,pDurFmt='Date',pView='Summary';
 // Project filters
 let prStartDate='',prEndDate='',prWorkType='ALL',prCompany='ALL',prJobId='',prDesc='',prStatus='ALL',prOwner='ALL',prDept='ALL',prUser='',prYear='ALL',prView='Summary',prSort='company',prSortDir=1,prDurFmt='Time';
 
@@ -181,6 +181,16 @@ function renderPerson(){
             <input type="text" value="${pSearch}" placeholder="ค้นหา..." oninput="pSearch=this.value;renderTab()"></div>
         </div>
         <div>
+          <div class="filter-row"><label>Duration Format</label><span class="colon">:</span>
+            <select onchange="pDurFmt=this.value;renderTab()">
+              <option value="Date"${pDurFmt==='Date'?' selected':''}>Date (6 d 05 h 30 m)</option>
+              <option value="Time"${pDurFmt==='Time'?' selected':''}>Time (53 h 30 m)</option>
+            </select></div>
+          <div class="filter-row"><label>Report View</label><span class="colon">:</span>
+            <select onchange="pView=this.value;renderTab()">
+              <option value="Summary"${pView==='Summary'?' selected':''}>Summary</option>
+              <option value="Detail"${pView==='Detail'?' selected':''}>Detail (แสดง Task)</option>
+            </select></div>
           <div class="filter-row"><label>สถานะ</label><span class="colon">:</span>
             <select onchange="pStatus=this.value;renderTab()">
               <option value="ALL"${pStatus==='ALL'?' selected':''}>ALL</option>
@@ -210,15 +220,25 @@ function renderPerson(){
           filtered.map(p=>{const c=p.status==='ok'?'var(--ok)':p.status==='warn'?'var(--warn)':'var(--bad)';return`<tr>
             <td class="bold" title="${p.name}">${p.name}</td>
             <td class="c"><span class="dept-tag dept-${p.dept}">${p.dept}</span></td>
-            ${sm.map(m=>`<td class="mono">${p.monthly[m]?.ms?fmt(p.monthly[m].ms,'Date'):'—'}</td>`).join('')}
-            <td class="mono" style="font-weight:700;color:var(--text)">${p.total}</td>
+            ${sm.map(m=>`<td class="mono">${p.monthly[m]?.ms?fmt(p.monthly[m].ms,pDurFmt):'—'}</td>`).join('')}
+            <td class="mono" style="font-weight:700;color:var(--text)">${fmt(p.totalMs,pDurFmt)}</td>
             <td><div class="pct-wrap"><div class="pct-bar"><div class="pct-fill" style="width:${Math.min(p.pct,100)}%;background:${c}"></div></div><span class="pct-num" style="color:${c}">${p.pct}%</span></div></td>
             <td><span class="badge ${p.status}">${p.status==='ok'?'✅ ครบ':p.status==='warn'?'⚠️ ไม่ครบ':'❌ น้อยมาก'}</span></td>
-          </tr>`;}).join('')}
+          </tr>
+          ${pView==='Detail'?(p.tasks||[]).map(t=>`
+          <tr style="background:#f8faff">
+            <td style="padding-left:28px;font-size:.73rem;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.task}">
+              📌 ${t.task}
+            </td>
+            <td></td>
+            ${sm.map(()=>`<td></td>`).join('')}
+            <td class="mono" style="color:var(--accent);font-size:.72rem">${fmt(t.ms,pDurFmt)}</td>
+            <td colspan="2"></td>
+          </tr>`).join(''):''}`;}).join('')}
         <tr class="grand-total">
           <td colspan="2">📊 Grand Total (${filtered.length} คน)</td>
-          ${sm.map(m=>`<td>${fD(gM[m])}</td>`).join('')}
-          <td>${fD(gMs)}</td><td colspan="2"></td>
+          ${sm.map(m=>`<td class="mono">${fD(gM[m])}</td>`).join('')}
+          <td class="mono">${fmt(gMs,pDurFmt)}</td><td colspan="2"></td>
         </tr>
       </tbody>
     </table></div></div>
@@ -401,8 +421,8 @@ function resetProjectFilters(){
   renderTab();
 }
 
-function fD(ms){if(!ms)return'—';const h=ms/3600000,d=Math.floor(h/8),rh=Math.floor(h%8),rm=Math.floor((h%1)*60);return`${d} d ${String(rh).padStart(2,'0')} h ${String(rm).padStart(2,'0')} m`;}
-function fH(ms){if(!ms)return'—';const h=ms/3600000,rh=Math.floor(h),rm=Math.floor((h%1)*60);return`${rh}h ${String(rm).padStart(2,'0')}m`;}
+function fD(ms){if(!ms)return'—';const h=ms/3600000,d=Math.floor(h/9),rh=Math.floor(h%9),rm=Math.floor((h%1)*60);return`${d} d ${String(rh).padStart(2,'0')} h ${String(rm).padStart(2,'0')} m`;}
+function fH(ms){if(!ms)return'—';const h=ms/3600000,rh=Math.floor(h),rm=Math.floor((h%1)*60);return`${rh} h ${String(rm).padStart(2,'0')} m`;}
 function fmt(ms,f){if(!ms&&ms!==0)return'—';return f==='Time'?fH(ms):fD(ms);}
 function fmtOver(ms,f){
   if(ms===null||ms===undefined)return'—';
