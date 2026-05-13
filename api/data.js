@@ -7,11 +7,19 @@ const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec
 
 function fmy(d){return`${MN[d.getMonth()]} ${d.getFullYear()}`;}
 
-// Extract Job ID from task name: "COMPANY | JOB_ID : Description"
+// Extract Job ID from task name - handles multiple patterns
 function extractJobId(name){
   if(!name)return"";
-  const m=name.match(/\|\s*([^:()\n]+?)(?:\s*[\(:]|$)/);
-  return m?m[1].trim():"";
+  // Pattern 1: "COMPANY | JOB_ID : Description" or "COMPANY | JOB_ID (note) : ..."
+  const m1=name.match(/\|\s*([A-Z][A-Z0-9_\/&-]+(?:_[A-Z0-9]+)*)/);
+  if(m1)return m1[1].trim();
+  // Pattern 2: "JOB ID TBP2337_ASCEN ..." or "JOBID TBP..."
+  const m2=name.match(/JOB\s*ID\s+([A-Z][A-Z0-9_\/]+)/i);
+  if(m2)return m2[1].trim();
+  // Pattern 3: Standalone Job ID pattern (e.g. TBP1234_XXX)
+  const m3=name.match(/\b(T[A-Z]{1,2}\d{4,}_[A-Z0-9]+)\b/);
+  if(m3)return m3[1].trim();
+  return"";
 }
 
 // Simple CSV parser
