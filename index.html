@@ -115,7 +115,7 @@ let raw=null,activeTab='person';
 // Person filters
 let pYear='ALL',pDept='ALL',pStatus='ALL',pSearch='',pSort=null,pDir=1;
 // Project filters
-let prStartDate='',prEndDate='',prWorkType='ALL',prCompany='ALL',prJobId='',prDesc='',prStatus='ALL',prOwner='ALL',prDept='ALL',prUser='',prYear='ALL',prView='Summary',prSort='company',prSortDir=1;
+let prStartDate='',prEndDate='',prWorkType='ALL',prCompany='ALL',prJobId='',prDesc='',prStatus='ALL',prOwner='ALL',prDept='ALL',prUser='',prYear='ALL',prView='Summary',prSort='company',prSortDir=1,prDurFmt='Time';
 
 async function loadData(){
   const btn=document.getElementById('refreshBtn');
@@ -210,7 +210,7 @@ function renderPerson(){
           filtered.map(p=>{const c=p.status==='ok'?'var(--ok)':p.status==='warn'?'var(--warn)':'var(--bad)';return`<tr>
             <td class="bold" title="${p.name}">${p.name}</td>
             <td class="c"><span class="dept-tag dept-${p.dept}">${p.dept}</span></td>
-            ${sm.map(m=>`<td class="mono">${p.monthly[m]?.display||'—'}</td>`).join('')}
+            ${sm.map(m=>`<td class="mono">${p.monthly[m]?.ms?fmt(p.monthly[m].ms,'Date'):'—'}</td>`).join('')}
             <td class="mono" style="font-weight:700;color:var(--text)">${p.total}</td>
             <td><div class="pct-wrap"><div class="pct-bar"><div class="pct-fill" style="width:${Math.min(p.pct,100)}%;background:${c}"></div></div><span class="pct-num" style="color:${c}">${p.pct}%</span></div></td>
             <td><span class="badge ${p.status}">${p.status==='ok'?'✅ ครบ':p.status==='warn'?'⚠️ ไม่ครบ':'❌ น้อยมาก'}</span></td>
@@ -229,34 +229,66 @@ function renderPerson(){
 function renderProject(){
   const{projects,years,dropdowns}=raw;
   const{companies,owners,statuses,workTypes,depts}=dropdowns;
-
-  // filter
-  const s=prStartDate?new Date(prStartDate).getTime():0;
-  const e=prEndDate?new Date(prEndDate).getTime():Infinity;
+  const f=prDurFmt;
 
   let filtered=projects.filter(p=>{
     return(prWorkType==='ALL'||p.workType===prWorkType)&&
            (prCompany==='ALL'||p.company===prCompany)&&
-           (prStatus==='ALL'||p.projStatus===prStatus)&&
+           (prStatus==='ALL'||p.status===prStatus)&&
            (prOwner==='ALL'||p.owner===prOwner)&&
            (prDept==='ALL'||p.dept===prDept)&&
            (!prJobId||p.jobId.toLowerCase().includes(prJobId.toLowerCase()))&&
-           (!prDesc||p.projDesc.toLowerCase().includes(prDesc.toLowerCase()));
+           (!prDesc||p.desc.toLowerCase().includes(prDesc.toLowerCase()));
   });
 
-  // sort
   filtered=[...filtered].sort((a,b)=>{
     const av=a[prSort]||'',bv=b[prSort]||'';
     if(typeof av==='number')return(av-bv)*prSortDir;
-    return av.localeCompare(bv)*prSortDir;
+    return String(av).localeCompare(String(bv))*prSortDir;
   });
 
   const totalTracked=filtered.reduce((s,p)=>s+p.trackedMs,0);
-  const totalEst=filtered.reduce((s,p)=>s+p.timeEstMs,0);
+  const totalEst=filtered.reduce((s,p)=>s+p.timeEstMs||0,0);
   const totalMD=filtered.reduce((s,p)=>s+p.manDayMs,0);
+  const totalOver=totalMD>0?totalMD-totalTracked:null;
+  const COLS=15; // total columns
+
+  const rows=filtered.map(p=>{
+    const overCls=p.overMs===null?'':(p.overMs<0?'color:var(--bad);font-weight:700':'color:var(--ok)');
+    const progCls=p.progressType==='ok'?'progress-ok':p.progressType==='warn'?'progress-warn':p.progressType==='bad'?'progress-bad':'';
+    const stsCls=p.status?.toLowerCase().includes('going')?'warn':p.status?.toLowerCase().includes('completed')?'ok':'';
+    const mainRow=`<tr style="border-top:2px solid var(--border)">
+      <td class="company" title="${p.company}">${p.company}</td>
+      <td class="jobid">${p.jobId}</td>
+      <td class="desc" title="${p.desc}">${p.desc||'—'}</td>
+      <td class="mono">${fmt(p.manDayMs,f)}</td>
+      <td class="mono">${p.timeEstMs||0?fmt(p.timeEstMs||0,f):'—'}</td>
+      <td class="mono" style="font-weight:700">${fmt(p.trackedMs,f)}</td>
+      <td class="over" style="${overCls}">${fmtOver(p.overMs,f)}</td>
+      <td class="${progCls}" style="font-size:.72rem;font-weight:600">${p.progress||'—'}</td>
+      <td>${p.status?`<span class="badge ${stsCls}">${p.status}</span>`:'—'}</td>
+      <td style="font-size:.73rem">${p.owner||'—'}</td>
+      <td style="font-size:.72rem;color:var(--muted)">${p.goLive||'—'}</td>
+      <td style="font-size:.72rem">${p.statusPay||'—'}</td>
+      <td style="font-size:.72rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.remark||''}">${p.remark||'—'}</td>
+      <td style="font-size:.72rem;color:var(--muted)">${p.startTrack||'—'}</td>
+      <td style="font-size:.72rem;color:var(--muted)">${p.endTrack||'—'}</td>
+    </tr>`;
+
+    const subRows=prView==='Detail'?(p.personTime||[]).map(pt=>`
+      <tr style="background:#fafbff">
+        <td></td>
+        <td colspan="4" style="font-size:.74rem;color:var(--muted);padding-left:24px">
+          👤 ${pt.name}
+        </td>
+        <td class="mono" style="color:var(--accent);font-weight:600">${fmt(pt.ms,f)}</td>
+        <td colspan="${COLS-6}"></td>
+      </tr>`).join(''):'';
+
+    return mainRow+subRows;
+  }).join('');
 
   document.getElementById('main').innerHTML=`
-    <!-- FILTER PANEL - Excel style -->
     <div class="filter-panel">
       <div class="filter-panel-title">🔍 ตัวกรองข้อมูล — Project Summary by Client</div>
       <div class="filter-grid">
@@ -265,6 +297,11 @@ function renderProject(){
             <input type="date" value="${prStartDate}" onchange="prStartDate=this.value;renderTab()"></div>
           <div class="filter-row"><label>End Date</label><span class="colon">:</span>
             <input type="date" value="${prEndDate}" onchange="prEndDate=this.value;renderTab()"></div>
+          <div class="filter-row"><label>Duration Format</label><span class="colon">:</span>
+            <select onchange="prDurFmt=this.value;renderTab()">
+              <option value="Time"${f==='Time'?' selected':''}>Time (83 h 20 m)</option>
+              <option value="Date"${f==='Date'?' selected':''}>Date (10 d 03 h 20 m)</option>
+            </select></div>
           <div class="filter-row"><label>Report View</label><span class="colon">:</span>
             <select onchange="prView=this.value;renderTab()">
               <option value="Summary"${prView==='Summary'?' selected':''}>Summary</option>
@@ -314,59 +351,49 @@ function renderProject(){
       </div>
     </div>
 
-    <!-- TABLE -->
     <div class="tbl-wrap"><div class="tbl-scroll"><table>
       <thead>
         <tr>
           <th colspan="3">ข้อมูลโปรเจค</th>
           <th colspan="4">Man Day & Time</th>
-          <th colspan="3">สถานะ</th>
+          <th colspan="2">Progress</th>
+          <th colspan="2">โปรเจค</th>
+          <th colspan="4">รายละเอียด</th>
         </tr>
         <tr>
           <th onclick="srtPR('company')">Company Name ${prSort==='company'?(prSortDir>0?'▲':'▼'):''}</th>
-          <th onclick="srtPR('jobId')">Job ID ${prSort==='jobId'?(prSortDir>0?'▲':'▼'):''}</th>
-          <th onclick="srtPR('projDesc')">Project Description ${prSort==='projDesc'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th onclick="srtPR('jobId')">Job ID</th>
+          <th onclick="srtPR('projDesc')">Project Description</th>
           <th class="r" onclick="srtPR('manDayMs')">Man Day (IT&DEV) ${prSort==='manDayMs'?(prSortDir>0?'▲':'▼'):''}</th>
-          <th class="r" onclick="srtPR('timeEstMs')">Time Estimated</th>
+          <th class="r">Time Estimated</th>
           <th class="r" onclick="srtPR('trackedMs')">Time Tracked ${prSort==='trackedMs'?(prSortDir>0?'▲':'▼'):''}</th>
-          <th class="r" onclick="srtPR('overMs')">Over Quota</th>
-          <th onclick="srtPR('progress')">Progress Status</th>
+          <th class="r" onclick="srtPR('overMs')">Over Quota ${prSort==='overMs'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th onclick="srtPR('progressType')">Progress Status</th>
           <th onclick="srtPR('projStatus')">Project Status</th>
           <th onclick="srtPR('owner')">Project Owner</th>
           <th>Go Live</th>
+          <th onclick="srtPR('statusPay')">Status Payment</th>
+          <th>Remark</th>
+          <th>Start Tracking</th>
+          <th>End Tracking</th>
         </tr>
       </thead>
       <tbody>
-        ${filtered.length===0?`<tr class="empty-row"><td colspan="11">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`:
-          filtered.map(p=>{
-            const overCls=p.overMs<0?'style="color:var(--bad);font-weight:700"':p.overMs===0?'':'style="color:var(--ok)"';
-            const progCls=p.progress.startsWith('✅')?'progress-ok':p.progress.startsWith('⚠️')?'progress-warn':p.progress.startsWith('❌')?'progress-bad':'';
-            const stsCls=p.projStatus==='On Going'?'warn':p.projStatus==='Completed'?'ok':'';
-            return`<tr>
-              <td class="company" title="${p.company}">${p.company}</td>
-              <td class="jobid">${p.jobId}</td>
-              <td class="desc" title="${p.projDesc}">${p.projDesc}</td>
-              <td class="mono">${p.manDay}</td>
-              <td class="mono">${p.timeEst||'—'}</td>
-              <td class="mono" style="font-weight:600">${p.tracked}</td>
-              <td class="over" ${overCls}>${p.overQuota||'—'}</td>
-              <td class="${progCls}">${p.progress||'—'}</td>
-              <td>${p.projStatus?`<span class="badge ${stsCls}">${p.projStatus}</span>`:'—'}</td>
-              <td style="font-size:.74rem">${p.owner||'—'}</td>
-              <td style="font-size:.74rem;color:var(--muted)">${p.goLive||'—'}</td>
-            </tr>`;
-          }).join('')}
+        ${filtered.length===0?`<tr class="empty-row"><td colspan="${COLS}">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`:rows}
         <tr class="grand-total">
           <td colspan="3">📊 Grand Total (${filtered.length} โปรเจค)</td>
-          <td>${totalMD>0?fD(totalMD):'—'}</td>
-          <td>${totalEst>0?fD(totalEst):'—'}</td>
-          <td>${fD(totalTracked)}</td>
-          <td>${totalMD>0?fD(totalMD-totalTracked):'—'}</td>
-          <td colspan="4"></td>
+          <td>${totalMD>0?fmt(totalMD,f):'—'}</td>
+          <td>${totalEst>0?fmt(totalEst,f):'—'}</td>
+          <td>${fmt(totalTracked,f)}</td>
+          <td style="${totalOver!==null&&totalOver<0?'color:var(--bad)':''}">${totalOver!==null?fmtOver(totalOver,f):'—'}</td>
+          <td colspan="${COLS-7}"></td>
         </tr>
       </tbody>
     </table></div></div>
-    <div class="note"><span>📝 Over Quota = Man Day − Time Tracked (ลบ = เกิน quota)</span><span>คลิกหัวคอลัมน์เพื่อเรียงลำดับ</span></div>`;
+    <div class="note">
+      <span>📝 Over Quota = Man Day − Time Tracked (ติดลบ = เกิน quota)</span>
+      <span>✅ Remaining ≥20% &nbsp; ⚠️ Remaining &lt;20% &nbsp; ❌ Over Quota</span>
+    </div>`;
 }
 
 function resetProjectFilters(){
@@ -376,6 +403,12 @@ function resetProjectFilters(){
 
 function fD(ms){if(!ms)return'—';const h=ms/3600000,d=Math.floor(h/8),rh=Math.floor(h%8),rm=Math.floor((h%1)*60);return`${d} d ${String(rh).padStart(2,'0')} h ${String(rm).padStart(2,'0')} m`;}
 function fH(ms){if(!ms)return'—';const h=ms/3600000,rh=Math.floor(h),rm=Math.floor((h%1)*60);return`${rh}h ${String(rm).padStart(2,'0')}m`;}
+function fmt(ms,f){if(!ms&&ms!==0)return'—';return f==='Time'?fH(ms):fD(ms);}
+function fmtOver(ms,f){
+  if(ms===null||ms===undefined)return'—';
+  const neg=ms<0;const abs=Math.abs(ms);
+  return(neg?'-':'')+fmt(abs,f);
+}
 function thM(m){const map={'Jan':'ม.ค.','Feb':'ก.พ.','Mar':'มี.ค.','Apr':'เม.ย.','May':'พ.ค.','Jun':'มิ.ย.','Jul':'ก.ค.','Aug':'ส.ค.','Sep':'ก.ย.','Oct':'ต.ค.','Nov':'พ.ย.','Dec':'ธ.ค.'};const[mon,yr]=m.split(' ');return`${map[mon]||mon}/${String(yr).slice(2)}`;}
 function pct(a,b){return Math.round(a/Math.max(b,1)*100);}
 function srtP(col){if(pSort===col)pDir*=-1;else{pSort=col;pDir=1;}renderTab();}
