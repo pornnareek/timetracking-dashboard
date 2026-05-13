@@ -54,28 +54,47 @@ async function fetchTasks(taskIds, token){
 export default async function handler(req,res){
   res.setHeader("Access-Control-Allow-Origin","*");
   const token=process.env.CLICKUP_API_TOKEN, teamId=process.env.CLICKUP_TEAM_ID;
+  const groupId=process.env.CLICKUP_GROUP_ID||"";
   const startYear=parseInt(process.env.START_YEAR||"2025"), endYear=new Date().getFullYear();
   if(!token||!teamId)return res.status(500).json({error:"กรุณาตั้งค่า Environment Variables ใน Vercel ก่อนค่ะ"});
 
-  // ── ดึง members ──
+  // ── ดึง members จาก Group หรือ Team ──
   let memberIds=[];
-  try{
-    const r=await fetch(`https://api.clickup.com/api/v2/team/${teamId}/member`,{headers:{Authorization:token}});
-    if(r.ok){const d=await r.json();memberIds=(d.members||[]).map(m=>m.user?.id).filter(Boolean);}
-  }catch(e){}
+  if(groupId){
+    // ดึง members จาก Group ID (แนะนำ - ได้ข้อมูลทุกคนในกลุ่ม)
+    try{
+      const r=await fetch(`https://api.clickup.com/api/v2/group?team_id=${teamId}&group_id=${groupId}`,{headers:{Authorization:token}});
+      if(r.ok){
+        const d=await r.json();
+        const group=(d.groups||[])[0];
+        memberIds=(group?.members||[]).map(m=>m.user?.id||m.id).filter(Boolean);
+      }
+    }catch(e){}
+  }
+  if(memberIds.length===0){
+    // fallback: ดึงจาก team members
+    try{
+      const r=await fetch(`https://api.clickup.com/api/v2/team/${teamId}/member`,{headers:{Authorization:token}});
+      if(r.ok){const d=await r.json();memberIds=(d.members||[]).map(m=>m.user?.id).filter(Boolean);}
+    }catch(e){}
+  }
 
   // ── ดึง time entries ──
   let allEntries=[];
+  // ใช้ memberIds เสมอ (ไม่ว่าจะมาจาก Group หรือ Team)
+  const assigneeParam=memberIds.length>0?`&assignee=${memberIds.join(",")}`:"";
+
   for(let y=startYear;y<=endYear;y++){
     const s=new Date(`${y}-01-01`).getTime(), e=new Date(`${y}-12-31T23:59:59`).getTime();
-    const ap=memberIds.length>0?`&assignee=${memberIds.join(",")}`:"";
     let page=0;
     try{
       while(true){
-        const r=await fetch(`https://api.clickup.com/api/v2/team/${teamId}/time_entries?start_date=${s}&end_date=${e}${ap}&page=${page}`,{headers:{Authorization:token}});
+        const r=await fetch(`https://api.clickup.com/api/v2/team/${teamId}/time_entries?start_date=${s}&end_date=${e}${assigneeParam}&page=${page}`,{headers:{Authorization:token}});
         if(!r.ok){const e=await r.json().catch(()=>({}));return res.status(r.status).json({error:`ClickUp Error: ${e.err||r.status}`});}
         const{data=[]}=await r.json();
-        allEntries=allEntries.concat(data);
+        // กรองเฉพาะ entry ที่ duration สมเหตุสมผล (≤24 ชั่วโมง = 86,400,000 ms ต่อ entry)
+        const valid=data.filter(e=>Number(e.duration)>0&&Number(e.duration)<=86400000);
+        allEntries=allEntries.concat(valid);
         if(data.length<100)break;
         if(++page>100)break;
       }
