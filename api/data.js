@@ -2,7 +2,7 @@
 export const config = { maxDuration: 60 };
 
 const WORKING_DAYS={Jan:20,Feb:20,Mar:21,Apr:19,May:21,Jun:21,Jul:23,Aug:21,Sep:22,Oct:22,Nov:21,Dec:23};
-const MS=3600000,HPD=8;
+const MS=3600000,HPD=9; // 1 วันทำงาน = 9 ชั่วโมง (รวมพัก)
 const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 function fmy(d){return`${MN[d.getMonth()]} ${d.getFullYear()}`;}
@@ -156,9 +156,14 @@ export default async function handler(req,res){
     const d=new Date(Number(e.start)),my=fmy(d),yr=d.getFullYear(),ms=Number(e.duration)||0;
     const name=e.user?.username||e.user?.email||"Unknown";
     const dept=(name.match(/\b([A-Z][A-Z0-9-]+)$/)||[])[1]||"Other";
-    if(!pMap[name])pMap[name]={name,dept,email:e.user?.email||"",monthly:{},yearly:{}};
+    const taskName=e.task?.name||"";
+    const jobId=extractJobId(taskName)||e.task_location?.list_name||"";
+    if(!pMap[name])pMap[name]={name,dept,email:e.user?.email||"",monthly:{},yearly:{},tasks:{}};
     pMap[name].monthly[my]=(pMap[name].monthly[my]||0)+ms;
     pMap[name].yearly[yr]=(pMap[name].yearly[yr]||0)+ms;
+    // Track task breakdown
+    const taskKey=jobId?`${jobId} | ${taskName}`:taskName;
+    pMap[name].tasks[taskKey]=(pMap[name].tasks[taskKey]||0)+ms;
   }
   const persons=Object.values(pMap).map(p=>{
     const md={};let tot=0;
@@ -170,7 +175,8 @@ export default async function handler(req,res){
     }
     const tTgt=years.reduce((s,y)=>s+getTgt(y),0),pct=tTgt>0?(tot/MS/HPD)/tTgt:0;
     return{name:p.name,dept:p.dept,email:p.email,monthly:md,yearly:yd,
-      totalMs:tot,pct:Math.round(pct*100),status:pct>=0.6?"ok":pct>=0.3?"warn":"bad"};
+      totalMs:tot,pct:Math.round(pct*100),status:pct>=0.6?"ok":pct>=0.3?"warn":"bad",
+      tasks:Object.entries(p.tasks).sort((a,b)=>b[1]-a[1]).slice(0,50).map(([t,ms])=>({task:t,ms}))};
   }).sort((a,b)=>a.dept.localeCompare(b.dept)||a.name.localeCompare(b.name));
 
   // ── ProjectSummary ──
