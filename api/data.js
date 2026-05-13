@@ -255,5 +255,6 @@ export default async function handler(req,res){
 
   res.json({persons,projects,months,years,deptSummary,summary,dropdowns,
     startYear,endYear,projDataCount:Object.keys(projData).length,
+    debug:{memberCount:memberIds.length,memberIds:memberIds.slice(0,5),groupId,totalEntries:allEntries.length},
     updatedAt:new Date().toISOString()});
 }
