@@ -6,151 +6,116 @@
 <title>Time Tracking Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --navy:#0f2547;--navy2:#1a3a6b;--accent:#3b82f6;--accent2:#60a5fa;
-  --ok:#059669;--ok-bg:#d1fae5;--ok-border:#6ee7b7;
-  --warn:#d97706;--warn-bg:#fef3c7;--warn-border:#fcd34d;
-  --bad:#dc2626;--bad-bg:#fee2e2;--bad-border:#fca5a5;
-  --bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
-}
+:root{--navy:#0f2547;--navy2:#1a3a6b;--accent:#3b82f6;--accent2:#60a5fa;--ok:#059669;--ok-bg:#d1fae5;--ok-b:#6ee7b7;--warn:#d97706;--warn-bg:#fef3c7;--warn-b:#fcd34d;--bad:#dc2626;--bad-bg:#fee2e2;--bad-b:#fca5a5;--bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
-
-/* TOP BAR */
-.topbar{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(15,37,71,.4)}
-.topbar-left{display:flex;align-items:center;gap:12px}
-.logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.topbar-title{font-size:1rem;font-weight:700;color:#fff;letter-spacing:-.01em}
-.topbar-title span{color:var(--accent2)}
+.topbar{background:linear-gradient(135deg,var(--navy),var(--navy2));height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(15,37,71,.4)}
+.topbar-title{font-size:.95rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .updated{font-size:.68rem;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace}
-.refresh-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 16px;border-radius:6px;font-size:.78rem;font-family:'Sarabun',sans-serif;cursor:pointer;transition:.15s;font-weight:500}
+.refresh-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 14px;border-radius:6px;font-size:.78rem;font-family:'Sarabun',sans-serif;cursor:pointer;transition:.15s}
 .refresh-btn:hover{background:rgba(255,255,255,.2)}
 .refresh-btn:disabled{opacity:.4;cursor:not-allowed}
-
-/* TABS */
 .tabs{background:var(--navy);padding:0 24px;display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,.1)}
-.tab{padding:11px 22px;font-size:.82rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,.5);border-bottom:3px solid transparent;transition:.15s;margin-bottom:-1px}
+.tab{padding:10px 22px;font-size:.82rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,.5);border-bottom:3px solid transparent;transition:.15s;margin-bottom:-1px}
 .tab:hover{color:rgba(255,255,255,.8)}
 .tab.active{color:#fff;border-bottom-color:var(--accent2)}
+.main{padding:16px 24px 60px;max-width:1600px;margin:0 auto}
 
-/* MAIN */
-.main{padding:20px 24px 60px;max-width:1500px;margin:0 auto}
-
-/* FILTER BAR */
-.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.filter-group{display:flex;flex-direction:column;gap:4px}
-.filter-label{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-.filter-select{border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:.8rem;font-family:'Sarabun',sans-serif;color:var(--text);background:var(--surface);min-width:130px;outline:none;cursor:pointer;transition:.15s}
-.filter-select:focus{border-color:var(--accent)}
-.filter-input{border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:.8rem;font-family:'Sarabun',sans-serif;color:var(--text);min-width:190px;outline:none;transition:.15s}
-.filter-input:focus{border-color:var(--accent)}
-.filter-count{font-size:.75rem;color:var(--muted);align-self:center;background:#f8fafc;padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
+/* FILTER PANEL - Excel style 2 columns */
+.filter-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.filter-panel-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+@media(max-width:768px){.filter-grid{grid-template-columns:1fr}}
+.filter-row{display:flex;align-items:center;gap:8px;min-height:30px}
+.filter-row label{font-size:.78rem;font-weight:600;color:var(--text);min-width:130px;flex-shrink:0}
+.filter-row .colon{color:var(--muted);flex-shrink:0}
+.filter-row select,.filter-row input[type="text"],.filter-row input[type="date"]{flex:1;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:.78rem;font-family:'Sarabun',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:.15s;min-width:0}
+.filter-row select:focus,.filter-row input:focus{border-color:var(--accent)}
+.filter-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap}
+.filter-count{font-size:.75rem;color:var(--muted);margin-left:auto;background:#f8fafc;padding:4px 12px;border-radius:20px;border:1px solid var(--border)}
 
 /* CARDS */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-@media(max-width:640px){.cards{grid-template-columns:repeat(2,1fr)}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:.2s}
-.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);transform:translateY(-1px)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .card.total::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
 .card.ok::before{background:linear-gradient(90deg,var(--ok),#34d399)}
 .card.warn::before{background:linear-gradient(90deg,var(--warn),#fbbf24)}
 .card.bad::before{background:linear-gradient(90deg,var(--bad),#f87171)}
-.card-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-weight:700}
-.card-value{font-size:2rem;font-weight:700;line-height:1;margin-bottom:4px}
-.card.total .card-value{color:var(--accent)}
-.card.ok .card-value{color:var(--ok)}
-.card.warn .card-value{color:var(--warn)}
-.card.bad .card-value{color:var(--bad)}
-.card-sub{font-size:.71rem;color:var(--muted)}
+.card-label{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;font-weight:700}
+.card-value{font-size:1.8rem;font-weight:700;line-height:1;margin-bottom:3px}
+.card.total .card-value{color:var(--accent)}.card.ok .card-value{color:var(--ok)}.card.warn .card-value{color:var(--warn)}.card.bad .card-value{color:var(--bad)}
+.card-sub{font-size:.7rem;color:var(--muted)}
 
-/* TABLE WRAPPER */
+/* TABLE */
 .tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .tbl-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:720px}
-
-/* TABLE HEADER - ROW 1 (group labels) */
+table{width:100%;border-collapse:collapse;min-width:900px}
 thead tr:first-child{background:var(--navy)}
-thead tr:first-child th{color:rgba(255,255,255,.85);font-size:.67rem;padding:8px 12px;text-align:center;font-weight:600;letter-spacing:.05em;white-space:nowrap}
-
-/* TABLE HEADER - ROW 2 (column names) */
-thead tr:nth-child(2) th{background:#f8fafc;color:var(--muted);font-size:.66rem;font-weight:700;padding:8px 12px;border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:.15s}
+thead tr:first-child th{color:rgba(255,255,255,.85);font-size:.66rem;padding:7px 10px;text-align:center;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+thead tr:nth-child(2) th{background:#f8fafc;color:var(--muted);font-size:.65rem;font-weight:700;padding:7px 10px;border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
 thead tr:nth-child(2) th:hover{background:#f1f5f9;color:var(--text)}
-th.num,td.num{text-align:right}
-
-/* TABLE BODY */
-td{padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:.78rem;white-space:nowrap;transition:.1s}
+th.r,td.r{text-align:right}
+th.c,td.c{text-align:center}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9;font-size:.76rem;white-space:nowrap}
 tbody tr:hover td{background:#f8faff}
 tbody tr:last-child td{border-bottom:none}
-td.name-td{font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-td.dept-td{text-align:center}
-td.mono{font-family:'IBM Plex Mono',monospace;font-size:.73rem;text-align:right;color:#475569}
-td.total-td{font-family:'IBM Plex Mono',monospace;font-size:.73rem;text-align:right;font-weight:700;color:var(--text)}
-
-/* DEPT TAGS */
-.dept-tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700}
-.dept-BSS{color:#1d4ed8;background:#dbeafe}
-.dept-CCS{color:#6d28d9;background:#ede9fe}
-.dept-IFS{color:#065f46;background:#d1fae5}
-.dept-ISD{color:#9a3412;background:#ffedd5}
-.dept-ISD-SA{color:#991b1b;background:#fee2e2}
-.dept-PMD{color:#831843;background:#fce7f3}
-.dept-SQA{color:#0e7490;background:#cffafe}
-.dept-CAC{color:#92400e;background:#fef3c7}
-.dept-Other{color:#475569;background:#f1f5f9}
-
-/* PCT BAR */
-.pct-wrap{display:flex;align-items:center;gap:7px;justify-content:flex-end}
-.pct-bar{width:60px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;flex-shrink:0}
-.pct-fill{height:100%;border-radius:3px;transition:width .4s}
-.pct-num{font-family:'IBM Plex Mono',monospace;font-size:.71rem;width:36px;text-align:right;font-weight:600}
-
-/* BADGE */
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap}
-.badge.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border)}
-.badge.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border)}
-.badge.bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad-border)}
-
-/* GRAND TOTAL */
-.grand-total td{background:#f0f7ff;font-weight:700;border-top:2px solid var(--border)}
-.grand-total td.mono,.grand-total td.total-td{font-family:'IBM Plex Mono',monospace;font-size:.73rem;text-align:right;color:var(--navy)}
-.grand-total td:first-child,.grand-total td:nth-child(2){font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;color:var(--navy);text-align:left}
-
-/* LOADING/ERROR */
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:14px;color:var(--muted)}
+td.bold{font-weight:600}
+td.mono{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-align:right;color:#475569}
+td.over{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-align:right}
+td.company{font-weight:700;color:var(--navy);max-width:120px;overflow:hidden;text-overflow:ellipsis}
+td.desc{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+td.jobid{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;color:var(--accent)}
+.dept-tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.69rem;font-weight:700}
+.dept-BSS{color:#1d4ed8;background:#dbeafe}.dept-CCS{color:#6d28d9;background:#ede9fe}
+.dept-IFS{color:#065f46;background:#d1fae5}.dept-ISD{color:#9a3412;background:#ffedd5}
+.dept-PMD{color:#831843;background:#fce7f3}.dept-SQA{color:#0e7490;background:#cffafe}
+.dept-CAC{color:#92400e;background:#fef3c7}.dept-Other{color:#475569;background:#f1f5f9}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.badge.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-b)}
+.badge.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-b)}
+.badge.bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad-b)}
+.progress-ok{color:var(--ok);font-weight:600;font-size:.72rem}
+.progress-warn{color:var(--warn);font-weight:600;font-size:.72rem}
+.progress-bad{color:var(--bad);font-weight:600;font-size:.72rem}
+.pct-wrap{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.pct-bar{width:56px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;flex-shrink:0}
+.pct-fill{height:100%;border-radius:3px}
+.pct-num{font-family:'IBM Plex Mono',monospace;font-size:.7rem;width:34px;text-align:right;font-weight:600}
+.grand-total td{background:#f0f7ff;font-weight:700;border-top:2px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-align:right}
+.grand-total td:first-child,.grand-total td:nth-child(2),.grand-total td:nth-child(3){font-family:'Sarabun',sans-serif;font-size:.78rem;text-align:left;color:var(--navy)}
+.loading{display:flex;flex-direction:column;align-items:center;padding:80px;gap:14px;color:var(--muted)}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.error-box{background:#fff5f5;border:1px solid var(--bad-border);border-radius:10px;padding:20px;color:var(--bad);font-size:.9rem;max-width:500px;margin:40px auto}
+.error-box{background:#fff5f5;border:1px solid var(--bad-b);border-radius:10px;padding:20px;color:var(--bad);font-size:.9rem;max-width:500px;margin:40px auto}
 .empty-row td{text-align:center;padding:32px;color:var(--muted)}
 .note{margin-top:10px;font-size:.7rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap}
+.section-gap{margin-top:16px}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="topbar-left">
-    <div class="logo">📊</div>
-    <div class="topbar-title">Time Tracking <span>Dashboard</span></div>
-  </div>
+  <div class="topbar-title">📊 Time Tracking Dashboard</div>
   <div class="topbar-right">
     <span class="updated" id="lastUpdated">—</span>
     <button class="refresh-btn" id="refreshBtn" onclick="loadData()">↻ รีเฟรช</button>
   </div>
 </div>
-
 <div class="tabs">
   <div class="tab active" onclick="switchTab('person')">👤 สรุปรายบุคคล</div>
-  <div class="tab" onclick="switchTab('project')">📁 สรุปรายโปรเจค</div>
+  <div class="tab" onclick="switchTab('project')">📁 Project Summary by Client</div>
 </div>
-
 <div class="main" id="main">
   <div class="loading"><div class="spinner"></div><span>กำลังโหลดข้อมูลจาก ClickUp...</span></div>
 </div>
-
 <script>
 let raw=null,activeTab='person';
+// Person filters
 let pYear='ALL',pDept='ALL',pStatus='ALL',pSearch='',pSort=null,pDir=1;
-let rYear='ALL',rDept='ALL',rSearch='';
+// Project filters
+let prStartDate='',prEndDate='',prWorkType='ALL',prCompany='ALL',prJobId='',prDesc='',prStatus='ALL',prOwner='ALL',prDept='ALL',prUser='',prYear='ALL',prView='Summary',prSort='company',prSortDir=1;
 
 async function loadData(){
   const btn=document.getElementById('refreshBtn');
@@ -160,6 +125,8 @@ async function loadData(){
     const data=await res.json();
     if(data.error)throw new Error(data.error);
     raw=data;
+    if(!prStartDate)prStartDate=`${data.startYear}-01-01`;
+    if(!prEndDate)prEndDate=new Date().toISOString().split('T')[0];
     document.getElementById('lastUpdated').textContent='อัปเดต: '+new Date(data.updatedAt).toLocaleString('th-TH');
     renderTab();
   }catch(e){
@@ -174,6 +141,7 @@ function switchTab(t){
 }
 function renderTab(){activeTab==='person'?renderPerson():renderProject();}
 
+// ─── PERSON SUMMARY ───
 function renderPerson(){
   const{persons,months,years,deptSummary,summary}=raw;
   const depts=['ALL',...Object.keys(deptSummary).sort()];
@@ -197,119 +165,221 @@ function renderPerson(){
       <div class="card warn"><div class="card-label">⚠️ ลงไม่ครบ 30-59%</div><div class="card-value">${fs.warn}</div><div class="card-sub">${pct(fs.warn,filtered.length)}% ของที่แสดง</div></div>
       <div class="card bad"><div class="card-label">❌ ลงน้อยมาก &lt;30%</div><div class="card-value">${fs.bad}</div><div class="card-sub">${pct(fs.bad,filtered.length)}% ของที่แสดง</div></div>
     </div>
-    <div class="filter-bar">
-      <div class="filter-group"><div class="filter-label">📅 ปี</div>
-        <select class="filter-select" onchange="pYear=this.value;renderTab()">
-          ${['ALL',...years.map(String)].map(y=>`<option value="${y}"${y===pYear?' selected':''}>${y==='ALL'?'ทุกปี':y}</option>`).join('')}
-        </select></div>
-      <div class="filter-group"><div class="filter-label">🏢 แผนก</div>
-        <select class="filter-select" onchange="pDept=this.value;renderTab()">
-          ${depts.map(d=>`<option value="${d}"${d===pDept?' selected':''}>${d==='ALL'?'ทุกแผนก':d}${d!=='ALL'?` (${deptSummary[d].total})`:''}</option>`).join('')}
-        </select></div>
-      <div class="filter-group"><div class="filter-label">🔖 สถานะ</div>
-        <select class="filter-select" onchange="pStatus=this.value;renderTab()">
-          <option value="ALL"${pStatus==='ALL'?' selected':''}>ทุกสถานะ</option>
-          <option value="ok"${pStatus==='ok'?' selected':''}>✅ ครบ (≥60%)</option>
-          <option value="warn"${pStatus==='warn'?' selected':''}>⚠️ ไม่ครบ (30-59%)</option>
-          <option value="bad"${pStatus==='bad'?' selected':''}>❌ น้อยมาก (&lt;30%)</option>
-        </select></div>
-      <div class="filter-group"><div class="filter-label">🔍 ค้นหา</div>
-        <input class="filter-input" type="text" placeholder="พิมพ์ชื่อพนักงาน..." value="${pSearch}" oninput="pSearch=this.value;renderTab()"></div>
-      <span class="filter-count">แสดง ${filtered.length} / ${persons.length} คน</span>
+    <div class="filter-panel">
+      <div class="filter-panel-title">🔍 ตัวกรองข้อมูล</div>
+      <div class="filter-grid">
+        <div>
+          <div class="filter-row"><label>ปี</label><span class="colon">:</span>
+            <select onchange="pYear=this.value;renderTab()">
+              ${['ALL',...years.map(String)].map(y=>`<option value="${y}"${y===pYear?' selected':''}>${y==='ALL'?'ทุกปี':y}</option>`).join('')}
+            </select></div>
+          <div class="filter-row"><label>แผนก</label><span class="colon">:</span>
+            <select onchange="pDept=this.value;renderTab()">
+              ${depts.map(d=>`<option value="${d}"${d===pDept?' selected':''}>${d==='ALL'?'ALL':d}</option>`).join('')}
+            </select></div>
+          <div class="filter-row"><label>ชื่อพนักงาน</label><span class="colon">:</span>
+            <input type="text" value="${pSearch}" placeholder="ค้นหา..." oninput="pSearch=this.value;renderTab()"></div>
+        </div>
+        <div>
+          <div class="filter-row"><label>สถานะ</label><span class="colon">:</span>
+            <select onchange="pStatus=this.value;renderTab()">
+              <option value="ALL"${pStatus==='ALL'?' selected':''}>ALL</option>
+              <option value="ok"${pStatus==='ok'?' selected':''}>✅ ครบ (≥60%)</option>
+              <option value="warn"${pStatus==='warn'?' selected':''}>⚠️ ไม่ครบ (30-59%)</option>
+              <option value="bad"${pStatus==='bad'?' selected':''}>❌ น้อยมาก (&lt;30%)</option>
+            </select></div>
+        </div>
+      </div>
+      <div class="filter-actions"><span class="filter-count">แสดง ${filtered.length} / ${persons.length} คน</span></div>
     </div>
     <div class="tbl-wrap"><div class="tbl-scroll"><table>
       <thead>
+        <tr><th colspan="2">ข้อมูลพนักงาน</th>${sm.length>0?`<th colspan="${sm.length}">Time Tracking รายเดือน</th>`:''}
+        <th colspan="3">สรุป</th></tr>
         <tr>
-          <th colspan="2">ข้อมูลพนักงาน</th>
-          ${sm.length>0?`<th colspan="${sm.length}">Time Tracking รายเดือน</th>`:''}
-          <th colspan="3">สรุป</th>
-        </tr>
-        <tr>
-          <th onclick="srt('name')">ชื่อ-นามสกุล ${pSort==='name'?(pDir>0?'▲':'▼'):''}</th>
-          <th onclick="srt('dept')" style="text-align:center">แผนก</th>
-          ${sm.map(m=>`<th class="num">${thM(m)}</th>`).join('')}
-          <th class="num" onclick="srt('totalMs')">รวม ${pSort==='totalMs'?(pDir>0?'▲':'▼'):''}</th>
-          <th class="num" onclick="srt('pct')">% ครบ ${pSort==='pct'?(pDir>0?'▲':'▼'):''}</th>
-          <th onclick="srt('status')">สถานะ</th>
+          <th onclick="srtP('name')">ชื่อ-นามสกุล ${pSort==='name'?(pDir>0?'▲':'▼'):''}</th>
+          <th class="c" onclick="srtP('dept')">แผนก</th>
+          ${sm.map(m=>`<th class="r">${thM(m)}</th>`).join('')}
+          <th class="r" onclick="srtP('totalMs')">รวม ${pSort==='totalMs'?(pDir>0?'▲':'▼'):''}</th>
+          <th class="r" onclick="srtP('pct')">% ครบ ${pSort==='pct'?(pDir>0?'▲':'▼'):''}</th>
+          <th onclick="srtP('status')">สถานะ</th>
         </tr>
       </thead>
       <tbody>
-        ${filtered.length===0?`<tr class="empty-row"><td colspan="${4+sm.length}">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`:
+        ${filtered.length===0?`<tr class="empty-row"><td colspan="${4+sm.length}">ไม่พบข้อมูล</td></tr>`:
           filtered.map(p=>{const c=p.status==='ok'?'var(--ok)':p.status==='warn'?'var(--warn)':'var(--bad)';return`<tr>
-            <td class="name-td" title="${p.name}">${p.name}</td>
-            <td class="dept-td"><span class="dept-tag dept-${p.dept}">${p.dept}</span></td>
+            <td class="bold" title="${p.name}">${p.name}</td>
+            <td class="c"><span class="dept-tag dept-${p.dept}">${p.dept}</span></td>
             ${sm.map(m=>`<td class="mono">${p.monthly[m]?.display||'—'}</td>`).join('')}
-            <td class="total-td">${p.total}</td>
+            <td class="mono" style="font-weight:700;color:var(--text)">${p.total}</td>
             <td><div class="pct-wrap"><div class="pct-bar"><div class="pct-fill" style="width:${Math.min(p.pct,100)}%;background:${c}"></div></div><span class="pct-num" style="color:${c}">${p.pct}%</span></div></td>
             <td><span class="badge ${p.status}">${p.status==='ok'?'✅ ครบ':p.status==='warn'?'⚠️ ไม่ครบ':'❌ น้อยมาก'}</span></td>
           </tr>`;}).join('')}
         <tr class="grand-total">
           <td colspan="2">📊 Grand Total (${filtered.length} คน)</td>
-          ${sm.map(m=>`<td class="mono">${fD(gM[m])}</td>`).join('')}
-          <td class="total-td">${fD(gMs)}</td><td colspan="2"></td>
+          ${sm.map(m=>`<td>${fD(gM[m])}</td>`).join('')}
+          <td>${fD(gMs)}</td><td colspan="2"></td>
         </tr>
       </tbody>
     </table></div></div>
-    <div class="note">
-      <span>📝 1 day = 8 hours</span>
-      <span>✅ ครบ = ≥60%</span><span>⚠️ ไม่ครบ = 30–59%</span><span>❌ น้อยมาก = &lt;30%</span>
-      <span>คลิกหัวคอลัมน์เพื่อเรียงลำดับ</span>
-    </div>`;
+    <div class="note"><span>📝 1 day = 8 hours</span><span>✅ ≥60%</span><span>⚠️ 30–59%</span><span>❌ &lt;30%</span><span>คลิกหัวคอลัมน์เพื่อเรียงลำดับ</span></div>`;
 }
 
+// ─── PROJECT SUMMARY ───
 function renderProject(){
-  const{projects,years,deptSummary}=raw;
-  const depts=['ALL',...Object.keys(deptSummary).sort()];
-  let filtered=(projects||[]).filter(p=>(rDept==='ALL'||p.dept===rDept)&&(!rSearch||p.project.toLowerCase().includes(rSearch.toLowerCase())));
-  const sy=rYear==='ALL'?years:[parseInt(rYear)];
-  const gMs=filtered.reduce((s,p)=>s+(rYear==='ALL'?p.totalMs:(p.yearly[parseInt(rYear)]?.ms||0)),0);
+  const{projects,years,dropdowns}=raw;
+  const{companies,owners,statuses,workTypes,depts}=dropdowns;
+
+  // filter
+  const s=prStartDate?new Date(prStartDate).getTime():0;
+  const e=prEndDate?new Date(prEndDate).getTime():Infinity;
+
+  let filtered=projects.filter(p=>{
+    return(prWorkType==='ALL'||p.workType===prWorkType)&&
+           (prCompany==='ALL'||p.company===prCompany)&&
+           (prStatus==='ALL'||p.projStatus===prStatus)&&
+           (prOwner==='ALL'||p.owner===prOwner)&&
+           (prDept==='ALL'||p.dept===prDept)&&
+           (!prJobId||p.jobId.toLowerCase().includes(prJobId.toLowerCase()))&&
+           (!prDesc||p.projDesc.toLowerCase().includes(prDesc.toLowerCase()));
+  });
+
+  // sort
+  filtered=[...filtered].sort((a,b)=>{
+    const av=a[prSort]||'',bv=b[prSort]||'';
+    if(typeof av==='number')return(av-bv)*prSortDir;
+    return av.localeCompare(bv)*prSortDir;
+  });
+
+  const totalTracked=filtered.reduce((s,p)=>s+p.trackedMs,0);
+  const totalEst=filtered.reduce((s,p)=>s+p.timeEstMs,0);
+  const totalMD=filtered.reduce((s,p)=>s+p.manDayMs,0);
 
   document.getElementById('main').innerHTML=`
-    <div class="filter-bar">
-      <div class="filter-group"><div class="filter-label">📅 ปี</div>
-        <select class="filter-select" onchange="rYear=this.value;renderTab()">
-          ${['ALL',...years.map(String)].map(y=>`<option value="${y}"${y===rYear?' selected':''}>${y==='ALL'?'ทุกปี':y}</option>`).join('')}
-        </select></div>
-      <div class="filter-group"><div class="filter-label">🏢 แผนก</div>
-        <select class="filter-select" onchange="rDept=this.value;renderTab()">
-          ${depts.map(d=>`<option value="${d}"${d===rDept?' selected':''}>${d==='ALL'?'ทุกแผนก':d}</option>`).join('')}
-        </select></div>
-      <div class="filter-group"><div class="filter-label">🔍 ค้นหาโปรเจค</div>
-        <input class="filter-input" type="text" placeholder="ชื่อโปรเจค / List..." value="${rSearch}" oninput="rSearch=this.value;renderTab()"></div>
-      <span class="filter-count">แสดง ${filtered.length} โปรเจค</span>
+    <!-- FILTER PANEL - Excel style -->
+    <div class="filter-panel">
+      <div class="filter-panel-title">🔍 ตัวกรองข้อมูล — Project Summary by Client</div>
+      <div class="filter-grid">
+        <div>
+          <div class="filter-row"><label>Start Date</label><span class="colon">:</span>
+            <input type="date" value="${prStartDate}" onchange="prStartDate=this.value;renderTab()"></div>
+          <div class="filter-row"><label>End Date</label><span class="colon">:</span>
+            <input type="date" value="${prEndDate}" onchange="prEndDate=this.value;renderTab()"></div>
+          <div class="filter-row"><label>Report View</label><span class="colon">:</span>
+            <select onchange="prView=this.value;renderTab()">
+              <option value="Summary"${prView==='Summary'?' selected':''}>Summary</option>
+              <option value="Detail"${prView==='Detail'?' selected':''}>Detail</option>
+            </select></div>
+          <div class="filter-row"><label>Department</label><span class="colon">:</span>
+            <select onchange="prDept=this.value;renderTab()">
+              <option value="ALL"${prDept==='ALL'?' selected':''}>ALL</option>
+              ${depts.map(d=>`<option value="${d}"${d===prDept?' selected':''}>${d}</option>`).join('')}
+            </select></div>
+          <div class="filter-row"><label>Report Year</label><span class="colon">:</span>
+            <select onchange="prYear=this.value;renderTab()">
+              <option value="ALL"${prYear==='ALL'?' selected':''}>ALL</option>
+              ${years.map(y=>`<option value="${y}"${String(y)===prYear?' selected':''}>${y}</option>`).join('')}
+            </select></div>
+        </div>
+        <div>
+          <div class="filter-row"><label>Work Type</label><span class="colon">:</span>
+            <select onchange="prWorkType=this.value;renderTab()">
+              <option value="ALL"${prWorkType==='ALL'?' selected':''}>ALL</option>
+              ${workTypes.map(t=>`<option value="${t}"${t===prWorkType?' selected':''}>${t}</option>`).join('')}
+            </select></div>
+          <div class="filter-row"><label>Company Name</label><span class="colon">:</span>
+            <select onchange="prCompany=this.value;renderTab()">
+              <option value="ALL"${prCompany==='ALL'?' selected':''}>ALL</option>
+              ${companies.map(c=>`<option value="${c}"${c===prCompany?' selected':''}>${c}</option>`).join('')}
+            </select></div>
+          <div class="filter-row"><label>Job ID</label><span class="colon">:</span>
+            <input type="text" value="${prJobId}" placeholder="ค้นหา Job ID..." oninput="prJobId=this.value;renderTab()"></div>
+          <div class="filter-row"><label>Project Description</label><span class="colon">:</span>
+            <input type="text" value="${prDesc}" placeholder="ค้นหาโปรเจค..." oninput="prDesc=this.value;renderTab()"></div>
+          <div class="filter-row"><label>Project Status</label><span class="colon">:</span>
+            <select onchange="prStatus=this.value;renderTab()">
+              <option value="ALL"${prStatus==='ALL'?' selected':''}>ALL</option>
+              ${statuses.map(s=>`<option value="${s}"${s===prStatus?' selected':''}>${s}</option>`).join('')}
+            </select></div>
+          <div class="filter-row"><label>Project Owner</label><span class="colon">:</span>
+            <select onchange="prOwner=this.value;renderTab()">
+              <option value="ALL"${prOwner==='ALL'?' selected':''}>ALL</option>
+              ${owners.map(o=>`<option value="${o}"${o===prOwner?' selected':''}>${o}</option>`).join('')}
+            </select></div>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button onclick="resetProjectFilters()" style="background:#f1f5f9;border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:.78rem;font-family:'Sarabun',sans-serif;cursor:pointer">🔄 รีเซ็ต</button>
+        <span class="filter-count">แสดง ${filtered.length} โปรเจค | Over Quota = Man Day − Time Tracked</span>
+      </div>
     </div>
+
+    <!-- TABLE -->
     <div class="tbl-wrap"><div class="tbl-scroll"><table>
       <thead>
-        <tr><th colspan="2">ข้อมูลโปรเจค</th>${sy.map(y=>`<th>ปี ${y}</th>`).join('')}<th>รวมทั้งหมด</th></tr>
         <tr>
-          <th>ชื่อโปรเจค / List</th>
-          <th style="text-align:center">แผนก</th>
-          ${sy.map(y=>`<th class="num">${y}</th>`).join('')}
-          <th class="num">รวม</th>
+          <th colspan="3">ข้อมูลโปรเจค</th>
+          <th colspan="4">Man Day & Time</th>
+          <th colspan="3">สถานะ</th>
+        </tr>
+        <tr>
+          <th onclick="srtPR('company')">Company Name ${prSort==='company'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th onclick="srtPR('jobId')">Job ID ${prSort==='jobId'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th onclick="srtPR('projDesc')">Project Description ${prSort==='projDesc'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th class="r" onclick="srtPR('manDayMs')">Man Day (IT&DEV) ${prSort==='manDayMs'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th class="r" onclick="srtPR('timeEstMs')">Time Estimated</th>
+          <th class="r" onclick="srtPR('trackedMs')">Time Tracked ${prSort==='trackedMs'?(prSortDir>0?'▲':'▼'):''}</th>
+          <th class="r" onclick="srtPR('overMs')">Over Quota</th>
+          <th onclick="srtPR('progress')">Progress Status</th>
+          <th onclick="srtPR('projStatus')">Project Status</th>
+          <th onclick="srtPR('owner')">Project Owner</th>
+          <th>Go Live</th>
         </tr>
       </thead>
       <tbody>
-        ${filtered.length===0?`<tr class="empty-row"><td colspan="${3+sy.length}">ไม่พบข้อมูล</td></tr>`:
-          filtered.map(p=>`<tr>
-            <td class="name-td" title="${p.project}">${p.project}</td>
-            <td class="dept-td"><span class="dept-tag dept-${p.dept}">${p.dept}</span></td>
-            ${sy.map(y=>`<td class="mono">${p.yearly[y]?.display||'—'}</td>`).join('')}
-            <td class="total-td">${rYear==='ALL'?p.total:(p.yearly[parseInt(rYear)]?.display||'—')}</td>
-          </tr>`).join('')}
+        ${filtered.length===0?`<tr class="empty-row"><td colspan="11">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`:
+          filtered.map(p=>{
+            const overCls=p.overMs<0?'style="color:var(--bad);font-weight:700"':p.overMs===0?'':'style="color:var(--ok)"';
+            const progCls=p.progress.startsWith('✅')?'progress-ok':p.progress.startsWith('⚠️')?'progress-warn':p.progress.startsWith('❌')?'progress-bad':'';
+            const stsCls=p.projStatus==='On Going'?'warn':p.projStatus==='Completed'?'ok':'';
+            return`<tr>
+              <td class="company" title="${p.company}">${p.company}</td>
+              <td class="jobid">${p.jobId}</td>
+              <td class="desc" title="${p.projDesc}">${p.projDesc}</td>
+              <td class="mono">${p.manDay}</td>
+              <td class="mono">${p.timeEst||'—'}</td>
+              <td class="mono" style="font-weight:600">${p.tracked}</td>
+              <td class="over" ${overCls}>${p.overQuota||'—'}</td>
+              <td class="${progCls}">${p.progress||'—'}</td>
+              <td>${p.projStatus?`<span class="badge ${stsCls}">${p.projStatus}</span>`:'—'}</td>
+              <td style="font-size:.74rem">${p.owner||'—'}</td>
+              <td style="font-size:.74rem;color:var(--muted)">${p.goLive||'—'}</td>
+            </tr>`;
+          }).join('')}
         <tr class="grand-total">
-          <td colspan="2">📊 Grand Total (${filtered.length} โปรเจค)</td>
-          ${sy.map(y=>`<td class="mono">${fH(filtered.reduce((s,p)=>s+(p.yearly[y]?.ms||0),0))}</td>`).join('')}
-          <td class="total-td">${fH(gMs)}</td>
+          <td colspan="3">📊 Grand Total (${filtered.length} โปรเจค)</td>
+          <td>${totalMD>0?fD(totalMD):'—'}</td>
+          <td>${totalEst>0?fD(totalEst):'—'}</td>
+          <td>${fD(totalTracked)}</td>
+          <td>${totalMD>0?fD(totalMD-totalTracked):'—'}</td>
+          <td colspan="4"></td>
         </tr>
       </tbody>
-    </table></div></div>`;
+    </table></div></div>
+    <div class="note"><span>📝 Over Quota = Man Day − Time Tracked (ลบ = เกิน quota)</span><span>คลิกหัวคอลัมน์เพื่อเรียงลำดับ</span></div>`;
 }
 
-function fD(ms){if(!ms)return'—';const h=ms/3600000,d=Math.floor(h/8),rh=Math.floor(h%8),rm=Math.floor((h%1)*60);return`${d}d ${String(rh).padStart(2,'0')}h ${String(rm).padStart(2,'0')}m`;}
+function resetProjectFilters(){
+  prWorkType='ALL';prCompany='ALL';prJobId='';prDesc='';prStatus='ALL';prOwner='ALL';prDept='ALL';prUser='';prYear='ALL';
+  renderTab();
+}
+
+function fD(ms){if(!ms)return'—';const h=ms/3600000,d=Math.floor(h/8),rh=Math.floor(h%8),rm=Math.floor((h%1)*60);return`${d} d ${String(rh).padStart(2,'0')} h ${String(rm).padStart(2,'0')} m`;}
 function fH(ms){if(!ms)return'—';const h=ms/3600000,rh=Math.floor(h),rm=Math.floor((h%1)*60);return`${rh}h ${String(rm).padStart(2,'0')}m`;}
 function thM(m){const map={'Jan':'ม.ค.','Feb':'ก.พ.','Mar':'มี.ค.','Apr':'เม.ย.','May':'พ.ค.','Jun':'มิ.ย.','Jul':'ก.ค.','Aug':'ส.ค.','Sep':'ก.ย.','Oct':'ต.ค.','Nov':'พ.ย.','Dec':'ธ.ค.'};const[mon,yr]=m.split(' ');return`${map[mon]||mon}/${String(yr).slice(2)}`;}
 function pct(a,b){return Math.round(a/Math.max(b,1)*100);}
-function srt(col){if(pSort===col)pDir*=-1;else{pSort=col;pDir=1;}renderTab();}
+function srtP(col){if(pSort===col)pDir*=-1;else{pSort=col;pDir=1;}renderTab();}
+function srtPR(col){if(prSort===col)prSortDir*=-1;else{prSort=col;prSortDir=1;}renderTab();}
 loadData();
 </script>
 </body>
